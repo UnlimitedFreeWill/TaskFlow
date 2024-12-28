@@ -1,37 +1,43 @@
-import React, { useState } from 'react';
-
-interface Task {
-    id: number;
-    title: string;
-    completed: boolean;
-}
+import React, {useState, useEffect} from 'react';
+import {fetchTasks, addTask, deleteTask, toggleTaskCompletion} from '../config/api';
+import { Task } from '../types/task';
 
 const TaskList: React.FC = () => {
-    const [tasks, setTasks] = useState<Task[]>([
-        { id: 1, title: 'Sarcina 1', completed: false },
-        { id: 2, title: 'Sarcina 2', completed: true },
-    ]);
-
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [newTask, setNewTask] = useState('');
     const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
 
-    const addTask = () => {
+    useEffect(() => {
+        // Fetch tasks from backend
+        fetchTasks()
+            .then(setTasks)
+            .catch(error => console.error('Error fetching tasks:', error));
+    }, []);
+
+    const handleAddTask = () => {
         if (newTask.trim()) {
-            setTasks([...tasks, { id: Date.now(), title: newTask, completed: false }]);
+            const taskToAdd = {title: newTask, completed: false};
+            addTask(taskToAdd)
+                .then(newTask => setTasks([...tasks, newTask]))
+                .catch(error => console.error('Error adding task:', error));
             setNewTask('');
         }
     };
 
-    const deleteTask = (id: number) => {
-        setTasks(tasks.filter(task => task.id !== id));
+    const handleDeleteTask = (id: string) => {
+        deleteTask(id)
+            .then(() => setTasks(tasks.filter(task => task.id !== id)))
+            .catch(error => console.error('Error deleting task:', error));
     };
 
-    const toggleTask = (id: number) => {
-        setTasks(
-            tasks.map(task =>
-                task.id === id ? { ...task, completed: !task.completed } : task
-            )
-        );
+    const handleToggleTask = (id: string) => {
+        const task = tasks.find(task => task.id === id);
+        if (!task) return;
+        toggleTaskCompletion(id, !task.completed)
+            .then(updatedTask => {
+                setTasks(tasks.map(t => (t.id === id ? updatedTask : t)));
+            })
+            .catch(error => console.error('Error updating task:', error));
     };
 
     const filteredTasks = tasks.filter(task => {
@@ -51,14 +57,16 @@ const TaskList: React.FC = () => {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                 />
-                <button className="btn btn-success" onClick={addTask}>Adaugă</button>
+                <button className="btn btn-success" onClick={handleAddTask}>
+                    Adaugă
+                </button>
             </div>
             <div className="mb-3">
                 <label className="form-label me-2">Filtrează:</label>
                 <select
                     className="form-select w-auto d-inline"
                     value={filter}
-                    onChange={(e) => setFilter(e.target.value as any)}
+                    onChange={(e) => setFilter(e.target.value as 'all' | 'completed' | 'incomplete')}
                 >
                     <option value="all">Toate</option>
                     <option value="completed">Finalizate</option>
@@ -78,11 +86,16 @@ const TaskList: React.FC = () => {
                                 type="checkbox"
                                 className="form-check-input me-2"
                                 checked={task.completed}
-                                onChange={() => toggleTask(task.id)}
+                                onChange={() => handleToggleTask(task.id)}
                             />
                             {task.title}
                         </div>
-                        <button className="btn btn-danger btn-sm" onClick={() => deleteTask(task.id)}>Șterge</button>
+                        <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteTask(task.id)}
+                        >
+                            Șterge
+                        </button>
                     </li>
                 ))}
             </ul>
