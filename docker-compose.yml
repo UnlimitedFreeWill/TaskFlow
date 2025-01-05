@@ -1,0 +1,61 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: taskflow-mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - taskflow-network
+
+  backend:
+    build:
+      context: ./taskflow-backend
+    image: taskflow-backend
+    container_name: taskflow-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    networks:
+      - taskflow-network
+
+  frontend:
+    build:
+      context: ./taskflow-frontend
+    image: taskflow-frontend
+    container_name: taskflow-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - taskflow-network
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: taskflow-jenkins
+    user: root
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - taskflow-network
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: taskflow-sonarqube
+    ports:
+      - "9000:9000"
+    networks:
+      - taskflow-network
+
+networks:
+  taskflow-network:
+    driver: bridge
+
+volumes:
+  jenkins_home:
