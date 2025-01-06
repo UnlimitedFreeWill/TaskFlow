@@ -1,13 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+    }
+
     stages {
         stage('Clean Environment') {
             steps {
                 script {
                     echo 'Cleaning up existing containers and resources...'
                     sh '''
-                    docker-compose down || true
+                    docker-compose -f ${DOCKER_COMPOSE_FILE} down || true
                     '''
                 }
             }
@@ -40,7 +44,7 @@ pipeline {
                 script {
                     echo 'Starting services for testing...'
                 }
-                echo 'Running tests...'
+                echo 'Running tests... (Currently no tests defined)'
             }
         }
 
@@ -57,7 +61,7 @@ pipeline {
                 script {
                     echo 'Deploying the application...'
                     sh '''
-                    docker-compose up -d
+                    docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
                     '''
                 }
             }
@@ -69,7 +73,7 @@ pipeline {
             script {
                 echo 'Cleaning up resources...'
                 sh '''
-                docker-compose down || true
+                docker-compose -f ${DOCKER_COMPOSE_FILE} down || true
                 '''
             }
             echo 'Pipeline completed.'

@@ -1,6 +1,9 @@
 # Folosește imaginea oficială Jenkins LTS ca bază
 FROM jenkins/jenkins:lts
 
+LABEL maintainer="Ionut Marin"
+LABEL description="Jenkins container with Docker and Docker Compose"
+
 # Rulează toate comenzile ca utilizator root
 USER root
 
@@ -10,7 +13,7 @@ RUN apt-get update && apt-get install -y docker.io && \
     chmod +x /usr/local/bin/docker-compose && \
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
-# Adaugă utilizatorul Jenkins în grupul Docker, doar dacă grupul nu există deja
+# Adaugă utilizatorul Jenkins în grupul Docker (dacă nu există deja)
 RUN if ! getent group docker; then groupadd -g 999 docker; fi && usermod -aG docker jenkins
 
 # Revine la utilizatorul Jenkins
