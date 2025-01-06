@@ -36,26 +36,10 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    echo 'Running tests (currently skipped)...'
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    echo 'Running SonarQube analysis...'
-                }
-            }
-        }
-
         stage('Deploy') {
             steps {
                 script {
-                    echo 'Starting backend and frontend containers...'
+                    echo 'Starting only backend and frontend containers...'
                     sh '''
                     docker-compose up -d backend frontend
                     '''
@@ -67,7 +51,7 @@ pipeline {
     post {
         always {
             script {
-                echo 'Pipeline completed. Resources cleaned for frontend and backend.'
+                echo 'Pipeline completed. No unnecessary services touched.'
             }
         }
         failure {
