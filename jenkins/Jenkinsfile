@@ -36,12 +36,24 @@ pipeline {
             }
         }
 
+        stage('Ensure Mongo is Running') {
+            steps {
+                script {
+                    sh '''
+                    if ! docker ps | grep -q taskflow-mongo; then
+                        docker-compose up -d mongo
+                    fi
+                    '''
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
                     echo 'Starting only backend and frontend containers...'
                     sh '''
-                    docker-compose up -d backend frontend
+                    docker-compose up -d --no-deps frontend backend
                     '''
                 }
             }
