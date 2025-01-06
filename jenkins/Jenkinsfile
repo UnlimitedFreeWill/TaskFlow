@@ -1,17 +1,14 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
-    }
-
     stages {
         stage('Clean Environment') {
             steps {
                 script {
-                    echo 'Cleaning up existing containers and resources...'
+                    echo 'Stopping and removing only frontend and backend containers...'
                     sh '''
-                    docker-compose -f ${DOCKER_COMPOSE_FILE} down || true
+                    docker-compose stop backend frontend || true
+                    docker-compose rm -f backend frontend || true
                     '''
                 }
             }
@@ -42,9 +39,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    echo 'Starting services for testing...'
+                    echo 'Running tests (currently skipped)...'
                 }
-                echo 'Running tests... (Currently no tests defined)'
             }
         }
 
@@ -59,9 +55,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    echo 'Deploying the application...'
+                    echo 'Starting backend and frontend containers...'
                     sh '''
-                    docker-compose -f ${DOCKER_COMPOSE_FILE} up -d
+                    docker-compose up -d backend frontend
                     '''
                 }
             }
@@ -71,12 +67,8 @@ pipeline {
     post {
         always {
             script {
-                echo 'Cleaning up resources...'
-                sh '''
-                docker-compose -f ${DOCKER_COMPOSE_FILE} down || true
-                '''
+                echo 'Pipeline completed. Resources cleaned for frontend and backend.'
             }
-            echo 'Pipeline completed.'
         }
         failure {
             script {

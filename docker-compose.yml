@@ -6,7 +6,8 @@ services:
       - "27017:27017"
     networks:
       - taskflow-network
-    restart: always
+    volumes:
+      - mongo_data:/data/db
 
   backend:
     build:
@@ -19,7 +20,6 @@ services:
       - mongo
     networks:
       - taskflow-network
-    restart: always
 
   frontend:
     build:
@@ -32,7 +32,6 @@ services:
       - backend
     networks:
       - taskflow-network
-    restart: always
 
   jenkins:
     build:
@@ -50,7 +49,7 @@ services:
     networks:
       - taskflow-network
     restart: always
-  
+
   sonarqube:
     image: sonarqube:community
     container_name: taskflow-sonarqube
@@ -66,3 +65,4 @@ networks:
 
 volumes:
   jenkins_home:
+  mongo_data:
