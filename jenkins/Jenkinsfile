@@ -5,10 +5,10 @@ pipeline {
         stage('Clean Environment') {
             steps {
                 script {
-                    echo 'Cleaning up existing containers, networks, and resources...'
+                    echo 'Cleaning up existing backend and frontend containers...'
                     sh '''
                     docker-compose stop backend frontend || true
-                    docker ps -a --filter "name=taskflow-backend" --filter "name=taskflow-frontend" -q | xargs -r docker rm -f || true
+                    docker-compose rm -f backend frontend || true
                     docker-compose down || true
                     docker network prune -f || true
                     '''
