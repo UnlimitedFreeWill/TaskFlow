@@ -7,7 +7,7 @@ pipeline {
                 script {
                     echo 'Stopping and removing only frontend and backend containers...'
                     sh '''
-                    docker-compose down
+                    docker-compose down || true
                     '''
                 }
             }
