@@ -35,7 +35,9 @@ services:
     restart: always
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: taskflow-jenkins
     user: root
     ports:
@@ -46,7 +48,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - taskflow-network
-    restart: always
 
   sonarqube:
     image: sonarqube:community
