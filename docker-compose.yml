@@ -62,6 +62,11 @@ services:
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_extensions:/opt/sonarqube/extensions
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
 
 networks:
   taskflow-shared-network:
