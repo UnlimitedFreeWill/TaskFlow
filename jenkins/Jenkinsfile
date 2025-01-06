@@ -15,17 +15,6 @@ pipeline {
             }
         }
 
-        stage('Build Images') {
-            steps {
-                script {
-                    echo 'Rebuilding backend and frontend images...'
-                    sh '''
-                    docker-compose build backend frontend
-                    '''
-                }
-            }
-        }
-
         stage('Ensure Mongo is Running') {
             steps {
                 script {
@@ -39,6 +28,29 @@ pipeline {
             }
         }
 
+        stage('Build Images') {
+            steps {
+                script {
+                    echo 'Rebuilding backend and frontend images...'
+                    sh '''
+                    docker-compose build backend frontend
+                    '''
+                }
+            }
+        }
+
+
+        stage('Build Project') {
+            steps {
+                script {
+                    echo 'Building the project...'
+                    sh '''
+                    cd taskflow-backend
+                    ../mvnw clean install -DskipTests || exit 1
+                    '''
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -51,7 +63,8 @@ pipeline {
                             ../mvnw sonar:sonar \
                                 -Dsonar.projectKey=taskflow-backend \
                                 -Dsonar.host.url=http://taskflow-sonarqube:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
+                                -Dsonar.login=$SONAR_TOKEN \
+                                -Dsonar.java.binaries=target/classes || exit 1
                             '''
                         }
                     }
