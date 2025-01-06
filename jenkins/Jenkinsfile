@@ -74,7 +74,7 @@ pipeline {
 
         stage('Quality Gate Check') {
            steps {
-               timeout(time: 2, unit: 'MINUTES') { // Așteaptă până la 2 minute
+               timeout(time: 5, unit: 'MINUTES') {
                    script {
                        def qualityGate = waitForQualityGate()
                        if (qualityGate.status != 'OK') {
