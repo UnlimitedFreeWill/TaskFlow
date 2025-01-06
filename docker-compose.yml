@@ -6,7 +6,6 @@ services:
       - "27017:27017"
     networks:
       - taskflow-network
-    restart: always
 
   backend:
     build:
@@ -19,7 +18,6 @@ services:
       - mongo
     networks:
       - taskflow-network
-    restart: always
 
   frontend:
     build:
@@ -32,12 +30,12 @@ services:
       - backend
     networks:
       - taskflow-network
-    restart: always
 
   jenkins:
     build:
-      context: .
+      context: ./jenkins
       dockerfile: Dockerfile
+    image: taskflow-jenkins
     container_name: taskflow-jenkins
     user: root
     ports:
@@ -48,7 +46,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - taskflow-network
-
+  
   sonarqube:
     image: sonarqube:community
     container_name: taskflow-sonarqube
@@ -56,7 +54,6 @@ services:
       - "9000:9000"
     networks:
       - taskflow-network
-    restart: always
 
 networks:
   taskflow-network:
@@ -64,3 +61,5 @@ networks:
 
 volumes:
   jenkins_home:
+
+restart: always
