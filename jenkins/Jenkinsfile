@@ -42,7 +42,7 @@ pipeline {
                 script {
                     echo 'Starting only backend and frontend containers...'
                     sh '''
-                    docker-compose up -d backend frontend
+                    docker-compose up -d --no-deps frontend backend
                     '''
                 }
             }
