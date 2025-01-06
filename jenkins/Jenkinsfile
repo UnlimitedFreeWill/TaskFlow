@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clean Environment') {
+            steps {
+                script {
+                    echo 'Cleaning up existing backend and frontend containers...'
+                    sh '''
+                    docker-compose -p taskflow stop backend frontend || true
+                    docker-compose -p taskflow rm -f backend frontend || true
+                    docker network prune -f || true
+                    '''
+                }
+            }
+        }
+
+        stage('Build Images') {
+            steps {
+                script {
+                    echo 'Rebuilding backend and frontend images...'
+                    sh '''
+                    docker-compose build backend frontend
+                    '''
+                }
+            }
+        }
+
+        stage('Ensure Mongo is Running') {
+            steps {
+                script {
+                    echo 'Ensuring Mongo container is running...'
+                    sh '''
+                    if ! docker ps | grep -q taskflow-mongo; then
+                        docker start -p taskflow taskflow-mongo || docker-compose -p taskflow up -d mongo
+                    fi
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo 'Starting only backend and frontend containers...'
+                    sh '''
+                    docker-compose -p taskflow up -d --no-deps frontend backend
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo 'Pipeline completed. No unnecessary services touched.'
+            }
+        }
+        failure {
+            script {
+                echo 'Pipeline failed. Check logs for more details.'
+            }
+        }
+    }
+}
