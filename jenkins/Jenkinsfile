@@ -72,6 +72,20 @@ pipeline {
             }
         }
 
+        stage('Quality Gate Check') {
+           steps {
+               timeout(time: 2, unit: 'MINUTES') { // Așteaptă până la 2 minute
+                   script {
+                       def qualityGate = waitForQualityGate()
+                       if (qualityGate.status != 'OK') {
+                           error "Pipeline failed due to Quality Gate: ${qualityGate.status}"
+                       }
+                   }
+               }
+           }
+       }
+        
+
         stage('Deploy') {
             steps {
                 script {
