@@ -9,7 +9,6 @@ pipeline {
                     sh '''
                     docker-compose -p taskflow stop backend frontend || true
                     docker-compose -p taskflow rm -f backend frontend || true
-                    docker-compose -p taskflow down || true
                     docker network prune -f || true
                     '''
                 }
@@ -33,7 +32,7 @@ pipeline {
                     echo 'Ensuring Mongo container is running...'
                     sh '''
                     if ! docker ps | grep -q taskflow-mongo; then
-                        docker start taskflow-mongo || docker-compose up -d mongo
+                        docker start -p taskflow taskflow-mongo || docker-compose -p taskflow up -d mongo
                     fi
                     '''
                 }
