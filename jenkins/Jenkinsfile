@@ -9,6 +9,7 @@ pipeline {
                     sh '''
                     docker-compose stop backend frontend || true
                     docker-compose rm -f backend frontend || true
+                    docker ps -a --filter "name=taskflow-backend" --filter "name=taskflow-frontend" -q | xargs -r docker rm -f || true
                     docker-compose down || true
                     docker network prune -f || true
                     '''
