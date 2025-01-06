@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y docker.io && \
     chmod +x /usr/local/bin/docker-compose && \
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
-# Adaugă utilizatorul Jenkins în grupul Docker
-RUN groupadd -g 999 docker && usermod -aG docker jenkins
+# Adaugă utilizatorul Jenkins în grupul Docker, doar dacă grupul nu există deja
+RUN if ! getent group docker; then groupadd -g 999 docker; fi && usermod -aG docker jenkins
 
 # Revine la utilizatorul Jenkins
 USER jenkins
