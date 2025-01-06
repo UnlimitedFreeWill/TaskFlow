@@ -47,7 +47,8 @@ pipeline {
                     withSonarQubeEnv('SonarQube Server') {
                         withCredentials([string(credentialsId: '98a4191f-2183-4e5f-9cb8-86a4c26bef24', variable: 'SONAR_TOKEN')]) {
                             sh '''
-                            ./mvnw sonar:sonar \
+                            cd taskflow-backend
+                            ../mvnw sonar:sonar \
                                 -Dsonar.projectKey=taskflow-backend \
                                 -Dsonar.host.url=http://taskflow-sonarqube:9000 \
                                 -Dsonar.login=$SONAR_TOKEN
