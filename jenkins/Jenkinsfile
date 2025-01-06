@@ -5,49 +5,35 @@ pipeline {
         stage('Clean Environment') {
             steps {
                 script {
-                    echo 'Cleaning up existing containers and resources...'
+                    echo 'Cleaning up existing containers, networks, and resources...'
                     sh '''
                     docker-compose down || true
+                    docker network prune -f || true
                     '''
                 }
             }
         }
 
-        stage('Build Backend') {
+        stage('Build Images') {
             steps {
                 script {
-                    echo 'Building backend image...'
+                    echo 'Rebuilding backend and frontend images...'
                     sh '''
-                    docker build -t taskflow-backend ./taskflow-backend
+                    docker-compose build backend frontend
                     '''
                 }
             }
         }
 
-        stage('Build Frontend') {
+        stage('Ensure Mongo is Running') {
             steps {
                 script {
-                    echo 'Building frontend image...'
+                    echo 'Ensuring Mongo container is running...'
                     sh '''
-                    docker build -t taskflow-frontend ./taskflow-frontend
+                    if ! docker ps | grep -q taskflow-mongo; then
+                        docker start taskflow-mongo || docker-compose up -d mongo
+                    fi
                     '''
-                }
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                script {
-                    echo 'Starting services for testing...'
-                }
-                echo 'Running tests...'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    echo 'Running SonarQube analysis...'
                 }
             }
         }
@@ -55,9 +41,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    echo 'Deploying the application...'
+                    echo 'Starting only backend and frontend containers...'
                     sh '''
-                    docker-compose up -d
+                    docker-compose up -d --no-deps frontend backend
                     '''
                 }
             }
@@ -67,12 +53,8 @@ pipeline {
     post {
         always {
             script {
-                echo 'Cleaning up resources...'
-                sh '''
-                docker-compose down || true
-                '''
+                echo 'Pipeline completed. No unnecessary services touched.'
             }
-            echo 'Pipeline completed.'
         }
         failure {
             script {

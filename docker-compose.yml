@@ -62,6 +62,7 @@ services:
 networks:
   taskflow-network:
     driver: bridge
+    name: taskflow-network
 
 volumes:
   jenkins_home:
