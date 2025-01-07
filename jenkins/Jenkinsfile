@@ -75,7 +75,7 @@ pipeline {
                             ../mvnw sonar:sonar \
                                 -Dsonar.projectKey=taskflow-backend \
                                 -Dsonar.host.url=http://taskflow-sonarqube:9000 \
-                                -Dsonar.login=$SONAR_TOKEN \
+                                -Dsonar.token=$SONAR_TOKEN \
                                 -Dsonar.java.binaries=target/classes || exit 1
                             '''
                         }
