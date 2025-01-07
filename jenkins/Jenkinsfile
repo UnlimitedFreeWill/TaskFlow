@@ -71,6 +71,17 @@ pipeline {
                 }
             }
         }
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    echo 'Starting only backend and frontend containers...'
+                    sh '''
+                    docker-compose -p taskflow up -d --no-deps frontend backend
+                    '''
+                }
+            }
+        }
 
         stage('Quality Gate Check') {
            steps {
@@ -84,17 +95,6 @@ pipeline {
                }
            }
        }
-        
-        stage('Deploy') {
-            steps {
-                script {
-                    echo 'Starting only backend and frontend containers...'
-                    sh '''
-                    docker-compose -p taskflow up -d --no-deps frontend backend
-                    '''
-                }
-            }
-        }
     }
 
     post {
