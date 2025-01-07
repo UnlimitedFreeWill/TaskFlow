@@ -51,6 +51,18 @@ pipeline {
                 }
             }
         }
+        
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo 'Starting only backend and frontend containers...'
+                    sh '''
+                    docker-compose -p taskflow up -d --no-deps frontend backend
+                    '''
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -71,20 +83,8 @@ pipeline {
                 }
             }
         }
-        
 
-        stage('Deploy') {
-            steps {
-                script {
-                    echo 'Starting only backend and frontend containers...'
-                    sh '''
-                    docker-compose -p taskflow up -d --no-deps frontend backend
-                    '''
-                }
-            }
-        }
-
-                stage('Quality Gate Check') {
+        stage('Quality Gate Check') {
            steps {
                timeout(time: 5, unit: 'MINUTES') {
                    script {
