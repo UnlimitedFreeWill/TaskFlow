@@ -1,50 +1,100 @@
-# React + TypeScript + Vite
+# TaskFlow Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Descriere
 
-Currently, two official plugins are available:
+Frontend-ul aplicației TaskFlow este construit folosind **React** și TypeScript, având ca scop oferirea unei interfețe intuitive pentru gestionarea taskurilor. Aplicația comunică cu backend-ul prin intermediul unui API REST.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Structura proiectului
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+taskflow-frontend/
+├── src/
+│   ├── components/          # Componente reutilizabile (ex: TaskList)
+│   ├── pages/               # Paginile principale ale aplicației (ex: Dashboard)
+│   ├── config/              # Configurații generale (ex: api.ts)
+│   ├── types/               # Tipuri definite cu TypeScript (ex: task.d.ts)
+│   ├── App.tsx              # Componenta principală
+│   ├── main.tsx             # Punctul de intrare în aplicație
+├── public/                  # Fișiere publice (ex: index.html)
+├── Dockerfile               # Configurația Docker pentru frontend
+├── package.json             # Gestionarea dependințelor npm
+├── vite.config.ts           # Configurația pentru Vite (bundler-ul folosit)
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Funcționalități implementate
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+1. **Dashboard pentru gestionarea taskurilor:**
+   - Listarea taskurilor existente.
+   - Adăugarea de noi taskuri.
+   - Editarea și ștergerea taskurilor existente.
+2. **Comunicare cu backend-ul:**
+   - Integrare cu API-ul REST pentru a accesa și modifica datele.
+3. **Design responsiv:**
+   - Interfață adaptabilă pentru diferite dimensiuni de ecran.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Configurare
+
+1. **Fișier `api.ts`**
+   ```typescript
+   const API_BASE_URL = "http://localhost:8080/tasks";
+
+   export const fetchTasks = async () => {
+       const response = await fetch(`${API_BASE_URL}`);
+       return response.json();
+   };
+
+   export const createTask = async (task) => {
+       const response = await fetch(`${API_BASE_URL}`, {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify(task),
+       });
+       return response.json();
+   };
+
+   // Alte metode pentru update și delete...
+   ```
+
+2. **Dockerfile pentru frontend**
+   ```dockerfile
+   # Faza de build
+   FROM node:22 AS build
+   WORKDIR /app
+   COPY . .
+   RUN npm install && npm run build
+
+   # Faza de servire
+   FROM nginx:latest
+   COPY --from=build /app/dist /usr/share/nginx/html
+   EXPOSE 80
+   ```
+
+## Comenzi utile
+
+1. **Rulare locală:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+2. **Construire pentru producție:**
+   ```bash
+   npm run build
+   ```
+3. **Pornire container Docker:**
+   ```bash
+   docker build -t taskflow-frontend .
+   docker run -p 3000:80 taskflow-frontend
+   ```
+
+## Structura paginilor și componentelor
+
+- **Dashboard.tsx**
+  - Pagină principală care afișează lista taskurilor utilizând componenta `TaskList`.
+- **TaskList.tsx**
+  - Componentă responsabilă de afișarea taskurilor într-o listă.
+- **App.tsx**
+  - Componenta de bază care gestionează routing-ul între pagini.
+
+## Testare
+
+- Testarea aplicației se poate realiza în browser prin rularea locală sau utilizând instrumente precum **Postman** pentru a verifica interacțiunea cu backend-ul.
