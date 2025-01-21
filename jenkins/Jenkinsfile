@@ -15,17 +15,6 @@ pipeline {
             }
         }
 
-        stage('Build Images') {
-            steps {
-                script {
-                    echo 'Rebuilding backend and frontend images...'
-                    sh '''
-                    docker-compose build backend frontend
-                    '''
-                }
-            }
-        }
-
         stage('Ensure Mongo is Running') {
             steps {
                 script {
@@ -39,6 +28,50 @@ pipeline {
             }
         }
 
+        stage('Build Images') {
+            steps {
+                script {
+                    echo 'Rebuilding backend and frontend images...'
+                    sh '''
+                    docker-compose build backend frontend
+                    '''
+                }
+            }
+        }
+
+
+        stage('Build Project') {
+            steps {
+                script {
+                    echo 'Building the project...'
+                    sh '''
+                    cd taskflow-backend
+                    ../mvnw clean install -DskipTests || exit 1
+                    '''
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo 'Running SonarQube analysis...'
+                    withSonarQubeEnv('SonarQube Server') {
+                        withCredentials([string(credentialsId: '98a4191f-2183-4e5f-9cb8-86a4c26bef24', variable: 'SONAR_TOKEN')]) {
+                            sh '''
+                            cd taskflow-backend
+                            ../mvnw sonar:sonar \
+                                -Dsonar.projectKey=taskflow-backend \
+                                -Dsonar.host.url=http://taskflow-sonarqube:9000 \
+                                -Dsonar.token=$SONAR_TOKEN \
+                                -Dsonar.java.binaries=target/classes || exit 1
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
         stage('Deploy') {
             steps {
                 script {

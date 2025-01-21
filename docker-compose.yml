@@ -57,7 +57,16 @@ services:
       - "9000:9000"
     networks:
       - taskflow-shared-network
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4'
 
 networks:
   taskflow-shared-network:
@@ -67,3 +76,6 @@ networks:
 volumes:
   jenkins_home:
   mongo_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
